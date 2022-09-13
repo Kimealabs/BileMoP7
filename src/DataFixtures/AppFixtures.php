@@ -32,7 +32,11 @@ class AppFixtures extends Fixture
             ["model" => "M5", "brand" => "Poco", "display" => "6.58-inch (2400x1080)", "front" => "8MP", "rear" => "50MP + 2MP + 2MP", "processor" => "Octa-core", "release" => "2022-09-05", "price" => "349.99"],
             ["model" => "Redmi note 11SE", "brand" => "Xiaomi", "display" => "6.43-inch (1800x2400)", "front" => "13MP", "rear" => "64MP + 8MP + 2MP + 2MP", "processor" => "Mediatek Helio G95", "release" => "2022-08-26", "price" => "449.99"],
             ["model" => "Moto G62 5G", "brand" => "Motorola", "display" => "6.50-inch (1080x2400)", "front" => "16MP", "rear" => "50MP + 8MP + 2MP", "processor" => "Qualcomm Snapdragon 695", "release" => "2022-08-11", "price" => "649.99"],
-            ["model" => "Galaxy Z Fold 4", "brand" => "Samsung", "display" => "7.60-inch (2716x1812)", "front" => "10MP + 4MP", "rear" => "50MP + 12MP + 10MP", "processor" => "Qualcomm Snapdragon 8 + Gen 1", "release" => "2022-08-10", "price" => "749.99"]
+            ["model" => "Galaxy Z Fold 4", "brand" => "Samsung", "display" => "7.60-inch (2716x1812)", "front" => "10MP + 4MP", "rear" => "50MP + 12MP + 10MP", "processor" => "Qualcomm Snapdragon 8 + Gen 1", "release" => "2022-08-10", "price" => "749.99"],
+            ["model" => "Galaxy A33", "brand" => "Samsung", "display" => "6.40-inch (1080x2400)", "front" => "5MP + 2MP", "rear" => "48MP", "processor" => "Octa-core", "release" => "2021-07-12", "price" => "349.90"],
+            ["model" => "Y55", "brand" => "Vivo", "display" => "6.40-inch (1080x2400)", "front" => "2MP + 2MP", "rear" => "50MP", "processor" => "Octa-core", "release" => "2021-03-10", "price" => "249.90"],
+            ["model" => "Redmi 10A", "brand" => "Xiaomi", "display" => "6.53-inch (720x1600)", "front" => "2MP", "rear" => "13MP", "processor" => "Cortex A53", "release" => "2020-02-20", "price" => "179.90"]
+
         ];
 
         $clients = [
@@ -50,7 +54,7 @@ class AppFixtures extends Fixture
                 ->setPassword($this->hasher->hashPassword($newClient, $client["password"]));
             $manager->persist($newClient);
 
-            for ($i = 0; $i < mt_rand(3, 8); $i++) {
+            for ($i = 0; $i < mt_rand(5, 15); $i++) {
                 $newUser = new User();
                 $newUser->setFirstname($faker->firstName($gender = null))
                     ->setSecondname($faker->lastName())

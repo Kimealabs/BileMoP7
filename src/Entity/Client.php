@@ -17,22 +17,22 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["getUsers"])]
+    #[Groups(["getUsers", "getClients", "getClient"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["getUsers"])]
+    #[Groups(["getUsers", "getClients", "getClient"])]
     private ?string $Company = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["getUsers"])]
+    #[Groups(["getUsers", "getClient"])]
     private ?string $Email = null;
 
     #[ORM\Column(length: 255)]
     private ?string $Password = null;
 
     #[ORM\Column]
-    #[Groups(["getUsers"])]
+    #[Groups(["getClient"])]
     private ?\DateTimeImmutable $CreatedAt = null;
 
     #[ORM\OneToMany(mappedBy: 'Client', targetEntity: User::class)]
