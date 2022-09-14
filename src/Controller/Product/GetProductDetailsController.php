@@ -10,7 +10,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-#[Route('/api/products/{id}', name: 'app_product_detail', methods: ['GET'])]
+#[Route('/api/products/{id}', name: 'app_product_detail', methods: ['GET'], requirements: ['id' => '\d+'])]
 class GetProductDetailsController extends AbstractController
 {
     public function __invoke(int $id, ProductRepository $productRepository, SerializerInterface $serializer): JsonResponse

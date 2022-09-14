@@ -50,14 +50,15 @@ class AppFixtures extends Fixture
             $newClient = new Client();
             $newClient->setCompany($client["company"])
                 ->setEmail($client["email"])
-                ->setCreatedAt(new \DateTimeImmutable('2021-' . $faker->numberBetween(1, 12) . '-' . $faker->numberBetween(1, 28) . ' ' . $faker->numberBetween(1, 23) . ':00:00'))
+                ->setCreatedAt(new \DateTimeImmutable($faker->numberBetween(2018, 2021) . '-' . $faker->numberBetween(1, 12) . '-' . $faker->numberBetween(1, 28) . ' ' . $faker->numberBetween(1, 23) . ':00:00'))
                 ->setPassword($this->hasher->hashPassword($newClient, $client["password"]))
-                ->setRoles(["ROLES_USER"]);
+                ->setRoles(["ROLE_USER"])
+                ->setPhone($faker->phoneNumber());
             $manager->persist($newClient);
 
-            for ($i = 0; $i < mt_rand(5, 15); $i++) {
+            for ($i = 0; $i < mt_rand(3, 8); $i++) {
                 $newUser = new User();
-                $newUser->setFirstname($faker->firstName($gender = null))
+                $newUser->setFirstname($faker->firstName())
                     ->setSecondname($faker->lastName())
                     ->setEmail($faker->email())
                     ->setAddress($faker->address())

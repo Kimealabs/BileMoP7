@@ -9,8 +9,10 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 #[Route('/api/products', name: 'app_products_list', methods: ['GET'])]
+#[IsGranted('ROLE_USER', message: 'You do not have the necessary rights for this resource')]
 class GetProductsController extends AbstractController
 {
     public function __invoke(ProductRepository $productRepository, SerializerInterface $serializer): JsonResponse
