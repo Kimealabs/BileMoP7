@@ -20,30 +20,30 @@ class User
     #[Groups(["getUsers", "getUser"])]
     #[Assert\NotBlank(message: "Firstname is required")]
     #[Assert\Length(min: 1, max: 255, minMessage: "Firstname must be at least {{ limit }} characters", maxMessage: "Firstname cannot be longer than {{ limit }} characters")]
-    private ?string $Firstname = null;
+    private ?string $firstname = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(["getUsers", "getUser"])]
     #[Assert\NotBlank(message: "Secondname is required")]
     #[Assert\Length(min: 1, max: 255, minMessage: "Secondname must be at least {{ limit }} characters", maxMessage: "Secondname cannot be longer than {{ limit }} characters")]
-    private ?string $Secondname = null;
+    private ?string $secondname = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(["getUser"])]
     #[Assert\NotBlank(message: "Address is required")]
     #[Assert\Length(min: 1, max: 255, minMessage: "Address must be at least {{ limit }} characters", maxMessage: "Address cannot be longer than {{ limit }} characters")]
-    private ?string $Address = null;
+    private ?string $address = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(["getUser"])]
     #[Assert\NotBlank(message: "Email is required")]
     #[Assert\Email(message: 'The email is not valid')]
     #[Assert\Length(min: 1, max: 255, minMessage: "Email must be at least {{ limit }} characters", maxMessage: "Email cannot be longer than {{ limit }} characters")]
-    private ?string $Email = null;
+    private ?string $email = null;
 
-    #[ORM\ManyToOne(inversedBy: 'users')]
+    #[ORM\ManyToOne(inversedBy: 'user')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Client $Client = null;
+    private ?Client $client = null;
 
     public function getId(): ?int
     {
@@ -52,60 +52,60 @@ class User
 
     public function getFirstname(): ?string
     {
-        return $this->Firstname;
+        return $this->firstname;
     }
 
-    public function setFirstname(string $Firstname): self
+    public function setFirstname(string $firstname): self
     {
-        $this->Firstname = $Firstname;
+        $this->firstname = $firstname;
 
         return $this;
     }
 
     public function getSecondname(): ?string
     {
-        return $this->Secondname;
+        return $this->secondname;
     }
 
-    public function setSecondname(string $Secondname): self
+    public function setSecondname(string $secondname): self
     {
-        $this->Secondname = $Secondname;
+        $this->secondname = $secondname;
 
         return $this;
     }
 
     public function getAddress(): ?string
     {
-        return $this->Address;
+        return $this->address;
     }
 
-    public function setAddress(string $Address): self
+    public function setAddress(string $address): self
     {
-        $this->Address = $Address;
+        $this->address = $address;
 
         return $this;
     }
 
     public function getEmail(): ?string
     {
-        return $this->Email;
+        return $this->email;
     }
 
-    public function setEmail(string $Email): self
+    public function setEmail(string $email): self
     {
-        $this->Email = $Email;
+        $this->email = $email;
 
         return $this;
     }
 
     public function getClient(): ?Client
     {
-        return $this->Client;
+        return $this->client;
     }
 
-    public function setClient(?Client $Client): self
+    public function setClient(?Client $client): self
     {
-        $this->Client = $Client;
+        $this->client = $client;
 
         return $this;
     }

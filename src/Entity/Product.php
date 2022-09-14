@@ -18,32 +18,32 @@ class Product
 
     #[ORM\Column(length: 255)]
     #[Groups(["getProducts"])]
-    private ?string $Model = null;
+    private ?string $model = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(["getProducts"])]
-    private ?string $Brand = null;
+    private ?string $brand = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $CreatedAt = null;
+    private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTimeInterface $ReleaseDate = null;
+    private ?\DateTimeInterface $releaseDate = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $Display = null;
+    private ?string $display = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $FrontCamera = null;
+    private ?string $frontCamera = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $RearCamera = null;
+    private ?string $rearCamera = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $Processor = null;
+    private ?string $processor = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $Price = null;
+    private ?string $price = null;
 
     public function getId(): ?int
     {
@@ -52,108 +52,108 @@ class Product
 
     public function getModel(): ?string
     {
-        return $this->Model;
+        return $this->model;
     }
 
-    public function setModel(string $Model): self
+    public function setModel(string $model): self
     {
-        $this->Model = $Model;
+        $this->model = $model;
 
         return $this;
     }
 
     public function getBrand(): ?string
     {
-        return $this->Brand;
+        return $this->brand;
     }
 
-    public function setBrand(string $Brand): self
+    public function setBrand(string $brand): self
     {
-        $this->Brand = $Brand;
+        $this->brand = $brand;
 
         return $this;
     }
 
     public function getCreatedAt(): ?\DateTimeImmutable
     {
-        return $this->CreatedAt;
+        return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $CreatedAt): self
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self
     {
-        $this->CreatedAt = $CreatedAt;
+        $this->createdAt = $createdAt;
 
         return $this;
     }
 
     public function getReleaseDate(): ?\DateTimeInterface
     {
-        return $this->ReleaseDate;
+        return $this->releaseDate;
     }
 
-    public function setReleaseDate(\DateTimeInterface $ReleaseDate): self
+    public function setReleaseDate(\DateTimeInterface $releaseDate): self
     {
-        $this->ReleaseDate = $ReleaseDate;
+        $this->releaseDate = $releaseDate;
 
         return $this;
     }
 
     public function getDisplay(): ?string
     {
-        return $this->Display;
+        return $this->display;
     }
 
-    public function setDisplay(string $Display): self
+    public function setDisplay(string $display): self
     {
-        $this->Display = $Display;
+        $this->display = $display;
 
         return $this;
     }
 
     public function getFrontCamera(): ?string
     {
-        return $this->FrontCamera;
+        return $this->frontCamera;
     }
 
-    public function setFrontCamera(string $FrontCamera): self
+    public function setFrontCamera(string $frontCamera): self
     {
-        $this->FrontCamera = $FrontCamera;
+        $this->frontCamera = $frontCamera;
 
         return $this;
     }
 
     public function getRearCamera(): ?string
     {
-        return $this->RearCamera;
+        return $this->rearCamera;
     }
 
-    public function setRearCamera(string $RearCamera): self
+    public function setRearCamera(string $rearCamera): self
     {
-        $this->RearCamera = $RearCamera;
+        $this->rearCamera = $rearCamera;
 
         return $this;
     }
 
     public function getProcessor(): ?string
     {
-        return $this->Processor;
+        return $this->processor;
     }
 
-    public function setProcessor(string $Processor): self
+    public function setProcessor(string $processor): self
     {
-        $this->Processor = $Processor;
+        $this->processor = $processor;
 
         return $this;
     }
 
     public function getPrice(): ?string
     {
-        return $this->Price;
+        return $this->price;
     }
 
-    public function setPrice(string $Price): self
+    public function setPrice(string $price): self
     {
-        $this->Price = $Price;
+        $this->price = $price;
 
         return $this;
     }
