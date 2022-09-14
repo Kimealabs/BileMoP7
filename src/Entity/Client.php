@@ -32,6 +32,9 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $Password = null;
 
     #[ORM\Column]
+    private array $roles = [];
+
+    #[ORM\Column]
     #[Groups(["getClient"])]
     private ?\DateTimeImmutable $CreatedAt = null;
 
@@ -45,7 +48,7 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUserIdentifier(): string
     {
-        return (string) $this->email;
+        return (string) $this->Email;
     }
 
     public function getRoles(): array

@@ -3,13 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Product;
+use App\Repository\UserRepository;
 use App\Repository\ClientRepository;
 use App\Repository\ProductRepository;
-use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ClientController extends AbstractController
@@ -34,6 +35,6 @@ class ClientController extends AbstractController
             $jsonClient = $serializer->serialize($client, 'json', ['groups' => 'getClient']);
             return new JsonResponse($jsonClient, Response::HTTP_OK, [], true);
         }
-        return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+        throw new HttpException(JsonResponse::HTTP_NOT_FOUND, "This Client don't exist");
     }
 }
