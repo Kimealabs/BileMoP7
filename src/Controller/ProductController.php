@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ProductController extends AbstractController
@@ -21,14 +22,19 @@ class ProductController extends AbstractController
             $jsonProductList = $serializer->serialize($products, 'json', ['groups' => 'getProducts']);
             return new JsonResponse($jsonProductList, Response::HTTP_OK, [], true);
         }
-        return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+        throw new HttpException(JsonResponse::HTTP_NOT_FOUND, "No product in database");
     }
 
     #[Route('/api/products/{id}', name: 'app_product', methods: ['GET'])]
-    public function product(Product $product, SerializerInterface $serializer): JsonResponse
+    public function product(int $id, ProductRepository $productRepository, SerializerInterface $serializer): JsonResponse
     {
+        $product = $productRepository->find($id);
+
+        if (!$product) {
+            throw new HttpException(JsonResponse::HTTP_NOT_FOUND, "This Product don't exist");
+        }
+
         $jsonProduct = $serializer->serialize($product, 'json');
-        if ($jsonProduct) return new JsonResponse($jsonProduct, Response::HTTP_OK, [], true);
-        return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+        return new JsonResponse($jsonProduct, Response::HTTP_OK, [], true);
     }
 }

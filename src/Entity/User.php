@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User
@@ -17,18 +18,27 @@ class User
 
     #[ORM\Column(length: 255)]
     #[Groups(["getUsers", "getUser"])]
+    #[Assert\NotBlank(message: "Firstname is required")]
+    #[Assert\Length(min: 1, max: 255, minMessage: "Firstname must be at least {{ limit }} characters", maxMessage: "Firstname cannot be longer than {{ limit }} characters")]
     private ?string $Firstname = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(["getUsers", "getUser"])]
+    #[Assert\NotBlank(message: "Secondname is required")]
+    #[Assert\Length(min: 1, max: 255, minMessage: "Secondname must be at least {{ limit }} characters", maxMessage: "Secondname cannot be longer than {{ limit }} characters")]
     private ?string $Secondname = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(["getUser"])]
+    #[Assert\NotBlank(message: "Address is required")]
+    #[Assert\Length(min: 1, max: 255, minMessage: "Address must be at least {{ limit }} characters", maxMessage: "Address cannot be longer than {{ limit }} characters")]
     private ?string $Address = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(["getUser"])]
+    #[Assert\NotBlank(message: "Email is required")]
+    #[Assert\Email(message: 'The email is not valid')]
+    #[Assert\Length(min: 1, max: 255, minMessage: "Email must be at least {{ limit }} characters", maxMessage: "Email cannot be longer than {{ limit }} characters")]
     private ?string $Email = null;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
