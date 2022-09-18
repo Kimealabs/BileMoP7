@@ -39,30 +39,22 @@ class ProductRepository extends ServiceEntityRepository
         }
     }
 
-    public function findByPaginate($limit, $page, $brand): array
+    public function findByPaginate($limit, $page): array
     {
         $firstResult = ($page - 1) * $limit;
-        $query = $this->createQueryBuilder('p')
+        return $this->createQueryBuilder('p')
             ->orderBy('p.id', 'ASC')
             ->setFirstResult($firstResult)
-            ->setMaxResults($limit);
-        if ($brand != 'all') {
-            $query->where('p.brand LIKE :keyword')
-                ->setParameter('keyword', '%' . $brand . '%');
-        }
-        return $query->getQuery()
+            ->setMaxResults($limit)
+            ->getQuery()
             ->getResult();
     }
 
-    public function getTotalProducts($brand): int
+    public function getTotalProducts(): int
     {
-        $query = $this->createQueryBuilder('p')
-            ->select('count(p.id)');
-        if ($brand != 'all') {
-            $query->where('p.brand LIKE :keyword')
-                ->setParameter('keyword', '%' . $brand . '%');
-        }
-        return $query->getQuery()
+        return $this->createQueryBuilder('p')
+            ->select('count(p.id)')
+            ->getQuery()
             ->getSingleScalarResult();
     }
     //    /**

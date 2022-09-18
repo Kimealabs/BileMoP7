@@ -56,7 +56,7 @@ class AppFixtures extends Fixture
                 ->setPhone($faker->phoneNumber());
             $manager->persist($newClient);
 
-            for ($i = 0; $i < mt_rand(3, 8); $i++) {
+            for ($i = 0; $i < mt_rand(8, 20); $i++) {
                 $newUser = new User();
                 $newUser->setFirstname($faker->firstName())
                     ->setSecondname($faker->lastName())
