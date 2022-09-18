@@ -3,6 +3,7 @@
 namespace App\Controller\Product;
 
 use App\Repository\ProductRepository;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,9 +17,20 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 #[IsGranted('ROLE_USER', message: 'You do not have the necessary rights for this resource')]
 class GetProductsController extends AbstractController
 {
-    public function __invoke(ProductRepository $productRepository, SerializerInterface $serializer): JsonResponse
+    public function __invoke(Request $request, ProductRepository $productRepository, SerializerInterface $serializer): JsonResponse
     {
-        $products = $productRepository->findAll();
+        $page = (int) $request->query->get('page', 1);
+        $limit = (int) $request->query->get('limit', 5);
+        $brand = (string) $request->query->get('brand', 'all');
+        if ($page == 0) $page = 1;
+        if ($limit == 0) $limit = 1;
+        if ($limit > 5) $limit = 5;
+
+        $totalProducts = $productRepository->getTotalProducts($brand);
+        $totalPages = ceil($totalProducts / $limit);
+        if ($totalPages < $page) $page = $totalPages;
+        $products = $productRepository->findByPaginate($limit, $page, $brand);
+
         foreach ($products as $product) {
             $product->setLinks([
                 [
@@ -28,12 +40,15 @@ class GetProductsController extends AbstractController
                 ]
             ]);
         }
-        $totalProducts = count($products);
 
         if ($products) {
             $content = [
                 "meta" => [
-                    "total" => $totalProducts
+                    "total products" => $totalProducts,
+                    "first page" => 1,
+                    "last page" => $totalPages,
+                    "current page" => $page,
+                    "limit" => $limit . " (max 5)"
                 ],
                 "links" => [
                     [
@@ -47,6 +62,7 @@ class GetProductsController extends AbstractController
             $jsonProductList = $serializer->serialize($content, 'json', ['groups' => 'getProducts']);
             return new JsonResponse($jsonProductList, Response::HTTP_OK, [], true);
         }
-        throw new HttpException(JsonResponse::HTTP_NO_CONTENT, "No product in database");
+        if ($brand == 'all') throw new HttpException(JsonResponse::HTTP_NOT_FOUND, "No product in database");
+        throw new HttpException(JsonResponse::HTTP_NOT_FOUND, "No product with " . $brand . " for brand in database");
     }
 }
