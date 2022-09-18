@@ -20,16 +20,19 @@ class GetProductsController extends AbstractController
     public function __invoke(Request $request, ProductRepository $productRepository, SerializerInterface $serializer): JsonResponse
     {
         $page = (int) $request->query->get('page', 1);
-        $limit = (int) $request->query->get('limit', 5);
-        $brand = (string) $request->query->get('brand', 'all');
+        $page_size = (int) $request->query->get('page_size', 5);
         if ($page == 0) $page = 1;
-        if ($limit == 0) $limit = 1;
-        if ($limit > 5) $limit = 5;
+        if ($page_size == 0) $page_size = 1;
+        if ($page_size > 5) $page_size = 5;
 
-        $totalProducts = $productRepository->getTotalProducts($brand);
-        $totalPages = ceil($totalProducts / $limit);
+        $totalProducts = $productRepository->getTotalProducts();
+        $totalPages = ceil($totalProducts / $page_size);
         if ($totalPages < $page) $page = $totalPages;
-        $products = $productRepository->findByPaginate($limit, $page, $brand);
+        $nextPage = ($page < $totalPages) ? $page + 1 : null;
+        $previousPage = ($page > 1) ? $page - 1 : null;
+        $currentPage = $page;
+
+        $products = $productRepository->findByPaginate($page_size, $page);
 
         foreach ($products as $product) {
             $product->setLinks([
@@ -45,24 +48,47 @@ class GetProductsController extends AbstractController
             $content = [
                 "meta" => [
                     "total products" => $totalProducts,
-                    "first page" => 1,
-                    "last page" => $totalPages,
-                    "current page" => $page,
-                    "limit" => $limit . " (max 5)"
+                    "Max page_size" => 5
                 ],
                 "links" => [
                     [
-                        "href" => $this->generateUrl('app_products_list', [], UrlGeneratorInterface::ABSOLUTE_URL),
+                        "href" => $this->generateUrl('app_products_list', ["page" => $currentPage, "page_size" => $page_size], UrlGeneratorInterface::ABSOLUTE_URL),
                         "rel" => "self",
                         "method" => "GET"
-                    ]
-                ],
-                "products" => $products
+                    ],
+                    [
+                        "href" => $this->generateUrl('app_products_list', ["page" => 1, "page_size" => $page_size], UrlGeneratorInterface::ABSOLUTE_URL),
+                        "rel" => "first page",
+                        "method" => "GET"
+                    ],
+                    [
+                        "href" => $this->generateUrl('app_products_list', ["page" => $totalPages, "page_size" => $page_size], UrlGeneratorInterface::ABSOLUTE_URL),
+                        "rel" => "last page",
+                        "method" => "GET"
+                    ],
+
+                ]
             ];
+            if ($nextPage !== null) {
+                $content["links"][] =
+                    [
+                        "href" => $this->generateUrl('app_products_list', ["page" => $nextPage, "page_size" => $page_size], UrlGeneratorInterface::ABSOLUTE_URL),
+                        "rel" => "next page",
+                        "method" => "GET"
+                    ];
+            }
+            if ($previousPage !== null) {
+                $content["links"][] =
+                    [
+                        "href" => $this->generateUrl('app_products_list', ["page" => $previousPage, "page_size" => $page_size], UrlGeneratorInterface::ABSOLUTE_URL),
+                        "rel" => "previous page",
+                        "method" => "GET"
+                    ];
+            }
+            $content["products"] = $products;
             $jsonProductList = $serializer->serialize($content, 'json', ['groups' => 'getProducts']);
             return new JsonResponse($jsonProductList, Response::HTTP_OK, [], true);
         }
-        if ($brand == 'all') throw new HttpException(JsonResponse::HTTP_NOT_FOUND, "No product in database");
-        throw new HttpException(JsonResponse::HTTP_NOT_FOUND, "No product with " . $brand . " for brand in database");
+        throw new HttpException(JsonResponse::HTTP_NOT_FOUND, "No product in database");
     }
 }

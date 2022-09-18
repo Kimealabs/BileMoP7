@@ -35,7 +35,9 @@ class AppFixtures extends Fixture
             ["model" => "Galaxy Z Fold 4", "brand" => "Samsung", "display" => "7.60-inch (2716x1812)", "front" => "10MP + 4MP", "rear" => "50MP + 12MP + 10MP", "processor" => "Qualcomm Snapdragon 8 + Gen 1", "release" => "2022-08-10", "price" => "749.99"],
             ["model" => "Galaxy A33", "brand" => "Samsung", "display" => "6.40-inch (1080x2400)", "front" => "5MP + 2MP", "rear" => "48MP", "processor" => "Octa-core", "release" => "2021-07-12", "price" => "349.90"],
             ["model" => "Y55", "brand" => "Vivo", "display" => "6.40-inch (1080x2400)", "front" => "2MP + 2MP", "rear" => "50MP", "processor" => "Octa-core", "release" => "2021-03-10", "price" => "249.90"],
-            ["model" => "Redmi 10A", "brand" => "Xiaomi", "display" => "6.53-inch (720x1600)", "front" => "2MP", "rear" => "13MP", "processor" => "Cortex A53", "release" => "2020-02-20", "price" => "179.90"]
+            ["model" => "Redmi 10A", "brand" => "Xiaomi", "display" => "6.53-inch (720x1600)", "front" => "2MP", "rear" => "13MP", "processor" => "Cortex A53", "release" => "2020-02-20", "price" => "179.90"],
+            ["model" => "Reno 8 5G", "brand" => "Oppo", "display" => "6.4-inch (1080x2400)", "front" => "64MP + 13MP + 8MP + 2MP", "rear" => "44MP + 2MP", "processor" => "Octa-core MediaTek Helio P95", "release" => "2019-08-17", "price" => "270.90"],
+            ["model" => "Pixel 2 XL", "brand" => "Google", "display" => "6.0-inch (1440x2880)", "front" => "12MP", "rear" => "8MP", "processor" => "Octa-core Qualcomm Snapdragon 835 MSM899", "release" => "2017-11-15", "price" => "180.90"],
 
         ];
 
@@ -56,7 +58,7 @@ class AppFixtures extends Fixture
                 ->setPhone($faker->phoneNumber());
             $manager->persist($newClient);
 
-            for ($i = 0; $i < mt_rand(3, 8); $i++) {
+            for ($i = 0; $i < mt_rand(8, 20); $i++) {
                 $newUser = new User();
                 $newUser->setFirstname($faker->firstName())
                     ->setSecondname($faker->lastName())
