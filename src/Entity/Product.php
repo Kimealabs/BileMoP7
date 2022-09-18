@@ -45,6 +45,25 @@ class Product
     #[ORM\Column(length: 255)]
     private ?string $price = null;
 
+    #[Groups(["getProducts"])]
+    private ?array $links = null;
+
+    public function setLinks(array $links): self
+    {
+        $this->links = $links;
+        return $this;
+    }
+
+    public function getLinks(): ?array
+    {
+        return $this->links;
+    }
+
+    public function removeLinks(): void
+    {
+        unset($this->links);
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -142,7 +161,6 @@ class Product
     public function setProcessor(string $processor): self
     {
         $this->processor = $processor;
-
         return $this;
     }
 

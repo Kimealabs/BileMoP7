@@ -20,6 +20,11 @@ class ExceptionSubscriber implements EventSubscriberInterface
                 'message' => $exception->getMessage()
             ];
 
+            if ($exception->getStatusCode() == 405) {
+                $data['message'] = "Method " . $event->getRequest()->getMethod() . " not allowed";
+                $data['links'] = $exception->getHeaders();
+            }
+
             $event->setResponse(new JsonResponse($data));
         } else {
             $data = [

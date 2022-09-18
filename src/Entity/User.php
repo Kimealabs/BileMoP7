@@ -45,6 +45,24 @@ class User
     #[ORM\JoinColumn(nullable: false)]
     private ?Client $client = null;
 
+    #[Groups(["getUsers"])]
+    private ?array $links = null;
+
+    public function setLinks(array $links): self
+    {
+        $this->links = $links;
+        return $this;
+    }
+
+    public function getLinks(): ?array
+    {
+        return $this->links;
+    }
+
+    public function removeLinks(): void
+    {
+        unset($this->links);
+    }
     public function getId(): ?int
     {
         return $this->id;

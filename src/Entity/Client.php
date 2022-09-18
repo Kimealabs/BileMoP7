@@ -160,7 +160,7 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @return Collection<int, User>
      */
-    public function getUser(): Collection
+    public function getUsers(): Collection
     {
         return $this->user;
     }
