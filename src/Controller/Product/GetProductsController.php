@@ -21,9 +21,11 @@ class GetProductsController extends AbstractController
         $products = $productRepository->findAll();
         foreach ($products as $product) {
             $product->setLinks([
-                "href" => $this->generateUrl('app_products_details', ["id" => $product->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
-                "rel" => "self",
-                "method" => "GET"
+                [
+                    "href" => $this->generateUrl('app_products_details', ["id" => $product->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
+                    "rel" => "self",
+                    "method" => "GET"
+                ]
             ]);
         }
         $totalProducts = count($products);

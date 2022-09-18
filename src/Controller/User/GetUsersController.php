@@ -21,9 +21,16 @@ class GetUsersController extends AbstractController
         $users = $client->getUsers();
         foreach ($users as $user) {
             $user->setLinks([
-                "href" => $this->generateUrl('app_users_details', ["id" => $user->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
-                "rel" => "self",
-                "method" => "GET"
+                [
+                    "href" => $this->generateUrl('app_users_details', ["id" => $user->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
+                    "rel" => "self",
+                    "method" => "GET"
+                ],
+                [
+                    "href" => $this->generateUrl('app_users_delete', ["id" => $user->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
+                    "rel" => "Delete user",
+                    "method" => "DELETE"
+                ]
             ]);
         }
 
@@ -37,7 +44,13 @@ class GetUsersController extends AbstractController
                         "href" => $this->generateUrl('app_users_list', [], UrlGeneratorInterface::ABSOLUTE_URL),
                         "rel" => "self",
                         "method" => "GET"
+                    ],
+                    [
+                        "href" => $this->generateUrl('app_users_post', [], UrlGeneratorInterface::ABSOLUTE_URL),
+                        "rel" => "New user",
+                        "method" => "POST"
                     ]
+
                 ],
                 "users" => $users
             ];

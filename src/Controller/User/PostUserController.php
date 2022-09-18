@@ -16,7 +16,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-#[Route('/api/users', name: 'app_user_post', methods: ['POST'])]
+#[Route('/api/users', name: 'app_users_post', methods: ['POST'])]
 #[IsGranted('ROLE_USER', message: 'You do not have the necessary rights for this resource')]
 class PostUserController extends AbstractController
 {
