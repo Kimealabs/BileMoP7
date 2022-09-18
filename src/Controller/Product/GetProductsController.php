@@ -3,22 +3,29 @@
 namespace App\Controller\Product;
 
 use App\Repository\ProductRepository;
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-#[Route('/api/products', name: 'app_products_list', methods: ['GET'])]
+#[Route('/api/products', name: 'app_products_list', methods: ['GET'], stateless: true)]
 #[IsGranted('ROLE_USER', message: 'You do not have the necessary rights for this resource')]
 class GetProductsController extends AbstractController
 {
-    public function __invoke(Request $request, ProductRepository $productRepository, SerializerInterface $serializer): JsonResponse
-    {
+    public function __invoke(
+        Request $request,
+        ProductRepository $productRepository,
+        SerializerInterface $serializer,
+        TagAwareCacheInterface $pool
+    ): JsonResponse {
+
         $page = (int) $request->query->get('page', 1);
         $page_size = (int) $request->query->get('page_size', 5);
         if ($page == 0) $page = 1;
@@ -32,8 +39,16 @@ class GetProductsController extends AbstractController
         $previousPage = ($page > 1) ? $page - 1 : null;
         $currentPage = $page;
 
-        $products = $productRepository->findByPaginate($page_size, $page);
+        // Cache item - return cache if item exist
+        $item = 'products-list-' . $page . '-' . $page_size;
+        $productsListItem = $pool->getItem($item);
+        if ($productsListItem->isHit()) {
+            return new JsonResponse($productsListItem->get(), Response::HTTP_OK, ["cache-control" => "cached item"], true);
+        }
 
+
+
+        $products = $productRepository->findByPaginate($page_size, $page);
         foreach ($products as $product) {
             $product->setLinks([
                 [
@@ -87,6 +102,9 @@ class GetProductsController extends AbstractController
             }
             $content["products"] = $products;
             $jsonProductList = $serializer->serialize($content, 'json', ['groups' => 'getProducts']);
+            $productsListItem->set($jsonProductList);
+            $pool->save($productsListItem);
+            sleep(3); // TEST CACHE WAY
             return new JsonResponse($jsonProductList, Response::HTTP_OK, [], true);
         }
         throw new HttpException(JsonResponse::HTTP_NOT_FOUND, "No product in database");
