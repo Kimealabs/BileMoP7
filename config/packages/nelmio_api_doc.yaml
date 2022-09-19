@@ -24,6 +24,16 @@ nelmio_api_doc:
                                 application/json:
                                     schema:
                                         $ref: "#/components/schemas/Token"
+            /api/users:
+                post:
+                    operationId: postUserItem
+                    summary: CREATE NEW USER
+                    requestBody:
+                        description: Create a new user
+                        content:
+                            application/json:
+                                schema:
+                                    $ref: "#/components/schemas/UserData"
         components:
             schemas:
                 Token:
@@ -41,6 +51,21 @@ nelmio_api_doc:
                         password:
                             type: string
                             default: yourPassword
+                UserData:
+                    type: object
+                    properties:
+                        email:
+                            type: string
+                            default: xxx@xxxx.com
+                        firstname:
+                            type: string
+                            default: yourFirstName
+                        secondname:
+                            type: string
+                            default: yourScondName
+                        address:
+                            type: string
+                            default: your address
             securitySchemes:
                 bearerAuth:
                     type: apiKey

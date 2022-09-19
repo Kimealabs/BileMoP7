@@ -2,22 +2,43 @@
 
 namespace App\Controller\User;
 
-use App\Entity\User;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use OpenApi\Attributes as OA;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
-use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/api/users', name: 'app_users_list', methods: ['GET'], stateless: true)]
-#[IsGranted('ROLE_USER', message: 'You do not have the necessary rights for this resource')]
+#[OA\Get(
+    path: '/api/users',
+    description: "USERS LIST BY AUTHENTICATED CLIENT",
+    responses: [
+        new OA\Response(response: 200, description: 'OK - List of Authenticate Client users'),
+        new OA\Response(response: 404, description: 'NOT FOUND - The client have no user'),
+        new OA\Response(response: 401, description: 'UNAUTHORIZED - JWT Token not found | Expired JWT Token | Invalid JWT Token'),
+    ]
+)]
+#[OA\Parameter(
+    name: 'page',
+    in: 'query',
+    description: 'The field used to choose number page',
+    schema: new OA\Schema(type: 'integer')
+)]
+#[OA\Parameter(
+    name: 'page_size',
+    in: 'query',
+    description: 'The field used to choose number of items by page',
+    schema: new OA\Schema(type: 'integer')
+)]
+#[OA\Tag(name: 'Users')]
+
 class GetUsersController extends AbstractController
 {
     public function __invoke(

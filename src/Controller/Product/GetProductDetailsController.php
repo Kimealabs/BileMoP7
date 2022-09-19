@@ -2,6 +2,8 @@
 
 namespace App\Controller\Product;
 
+use Nelmio\ApiDocBundle\Annotation\Model;
+use OpenApi\Attributes as OA;
 use App\Repository\ProductRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -14,6 +16,23 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 
 #[Route('/api/products/{id}', name: 'app_products_details', methods: ['GET'], requirements: ['id' => '\d+'], stateless: true)]
+#[OA\Get(
+    path: '/api/products/{id}',
+    description: "PRODUCT DETAILS BY id",
+    responses: [
+        new OA\Response(response: 200, description: 'OK - id Products details'),
+        new OA\Response(response: 404, description: 'NOT FOUND - This Product do not exist'),
+        new OA\Response(response: 401, description: 'UNAUTHORIZED - JWT Token not found | Expired JWT Token | Invalid JWT Token')
+    ]
+)]
+#[OA\Parameter(
+    name: 'id',
+    in: 'path',
+    required: true,
+    description: 'The idendifiant of product',
+    schema: new OA\Schema(type: 'integer')
+)]
+#[OA\Tag(name: 'Products')]
 class GetProductDetailsController extends AbstractController
 {
     public function __invoke(

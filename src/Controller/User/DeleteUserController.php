@@ -2,19 +2,36 @@
 
 namespace App\Controller\User;
 
+use Nelmio\ApiDocBundle\Annotation\Model;
+use OpenApi\Attributes as OA;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
-use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/api/users/{id}', name: 'app_users_delete', methods: ['DELETE'], requirements: ['id' => '\d+'], stateless: true)]
-#[IsGranted('ROLE_USER', message: 'You do not have the necessary rights for this resource')]
+#[OA\Get(
+    path: '/api/users/{id}',
+    description: "DELETE USER BY id",
+    responses: [
+        new OA\Response(response: 204, description: 'NO CONTENT - User deleted'),
+        new OA\Response(response: 404, description: 'NOT FOUND - This user don\'t exist'),
+        new OA\Response(response: 403, description: 'FORBIDDEN - This resource does not belong to you'),
+        new OA\Response(response: 401, description: 'UNAUTHORIZED - JWT Token not found | Expired JWT Token | Invalid JWT Token'),
+    ]
+)]
+#[OA\Parameter(
+    name: 'id',
+    in: 'path',
+    required: true,
+    description: 'The idendifiant of user',
+    schema: new OA\Schema(type: 'integer')
+)]
+#[OA\Tag(name: 'Users')]
 class DeleteUserController extends AbstractController
 {
     public function __invoke(
