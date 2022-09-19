@@ -45,7 +45,7 @@ class GetUsersController extends AbstractController
         // Cache item - return cache if item exist
         $item = 'users-list-' . $page . '-' . $page_size;
         if ($pool->hasItem($item)) {
-            return new JsonResponse($pool->getItem($item)->get(), Response::HTTP_OK, ["cache-control" => "cached item"], true);
+            return new JsonResponse($pool->getItem($item)->get(), Response::HTTP_OK, ["cache-control" => "max-age=60"], true);
         }
 
         $users = $userRepository->findUsersByClientPaginate($page_size, $page, $client->getId());

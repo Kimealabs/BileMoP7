@@ -26,7 +26,7 @@ class GetProductDetailsController extends AbstractController
         // Cache item - return cache if item exist
         $item = 'products-details-' . $id;
         if ($pool->hasItem($item)) {
-            return new JsonResponse($pool->getItem($item)->get(), Response::HTTP_OK, ["cache-control" => "cached item"], true);
+            return new JsonResponse($pool->getItem($item)->get(), Response::HTTP_OK, ["cache-control" => "max-age=60"], true);
         }
 
         $product = $productRepository->find($id);
@@ -48,7 +48,7 @@ class GetProductDetailsController extends AbstractController
 
         // SET AND SAVE CACHE ITEM
         $jsonProduct = $serializer->serialize($content, 'json');
-        $productsDetailsItem->getItem($item);
+        $productsDetailsItem = $pool->getItem($item);
         $productsDetailsItem->set($jsonProduct);
         $productsDetailsItem->tag("products");
         $productsDetailsItem->expiresAfter(60);

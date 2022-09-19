@@ -29,7 +29,7 @@ class GetUserDetailsController extends AbstractController
         // Cache item - return cache if item exist
         $item = 'users-details-client_' . $client->getId() . '-user_' . $id;
         if ($pool->hasItem($item)) {
-            return new JsonResponse($pool->getItem($item)->get(), Response::HTTP_OK, ["cache-control" => "cached item"], true);
+            return new JsonResponse($pool->getItem($item)->get(), Response::HTTP_OK, ["cache-control" => "max-age=60"], true);
         }
 
 
@@ -54,7 +54,7 @@ class GetUserDetailsController extends AbstractController
             ];
 
             $jsonUser = $serializer->serialize($content, 'json', ['groups' => 'getUser']);
-            $usersDetailsItem->getItem($item);
+            $usersDetailsItem = $pool->getItem($item);
             $usersDetailsItem->set($jsonUser);
             $usersDetailsItem->tag(['user_' . $user->getId()]);
             $usersDetailsItem->expiresAfter(60);
