@@ -2,6 +2,7 @@
 
 namespace App\Controller\User;
 
+use OpenApi\Attributes as OA;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -9,17 +10,24 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
-use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/api/users', name: 'app_users_post', methods: ['POST'], stateless: true)]
-#[IsGranted('ROLE_USER', message: 'You do not have the necessary rights for this resource')]
+#[OA\Get(
+    path: '/api/users',
+    description: "CREATE A NEW USER",
+    responses: [
+        new OA\Response(response: 202, description: 'CREATED - show header Location'),
+        new OA\Response(response: 400, description: 'BAD REQUEST - A problem with body data'),
+        new OA\Response(response: 401, description: 'UNAUTHORIZED - JWT Token not found | Expired JWT Token | Invalid JWT Token'),
+    ]
+)]
+#[OA\Tag(name: 'Users')]
 class PostUserController extends AbstractController
 {
     public function __invoke(
