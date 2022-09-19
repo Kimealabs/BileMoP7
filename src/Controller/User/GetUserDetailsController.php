@@ -3,7 +3,6 @@
 namespace App\Controller\User;
 
 use App\Repository\UserRepository;
-use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -28,10 +27,9 @@ class GetUserDetailsController extends AbstractController
         $client = $this->getUser();
 
         // Cache item - return cache if item exist
-        $item = 'users-details-' . $id;
-        $usersDetailsItem = $pool->getItem($item);
-        if ($usersDetailsItem->isHit()) {
-            return new JsonResponse($usersDetailsItem->get(), Response::HTTP_OK, ["cache-control" => "cached item"], true);
+        $item = 'users-details-client_' . $client->getId() . '-user_' . $id;
+        if ($pool->hasItem($item)) {
+            return new JsonResponse($pool->getItem($item)->get(), Response::HTTP_OK, ["cache-control" => "cached item"], true);
         }
 
 
@@ -56,7 +54,10 @@ class GetUserDetailsController extends AbstractController
             ];
 
             $jsonUser = $serializer->serialize($content, 'json', ['groups' => 'getUser']);
+            $usersDetailsItem->getItem($item);
             $usersDetailsItem->set($jsonUser);
+            $usersDetailsItem->tag(['user_' . $user->getId()]);
+            $usersDetailsItem->expiresAfter(60);
             $pool->save($usersDetailsItem);
             sleep(3); // TEST CACHE WAY
 

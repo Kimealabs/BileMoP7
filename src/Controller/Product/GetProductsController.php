@@ -3,7 +3,6 @@
 namespace App\Controller\Product;
 
 use App\Repository\ProductRepository;
-use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -42,8 +41,8 @@ class GetProductsController extends AbstractController
         // Cache item - return cache if item exist
         $item = 'products-list-' . $page . '-' . $page_size;
         $productsListItem = $pool->getItem($item);
-        if ($productsListItem->isHit()) {
-            return new JsonResponse($productsListItem->get(), Response::HTTP_OK, ["cache-control" => "cached item"], true);
+        if ($pool->hasItem($item)) {
+            return new JsonResponse($pool->getItem($item)->get(), Response::HTTP_OK, ["cache-control" => "cached item"], true);
         }
 
 
@@ -102,7 +101,10 @@ class GetProductsController extends AbstractController
             }
             $content["products"] = $products;
             $jsonProductList = $serializer->serialize($content, 'json', ['groups' => 'getProducts']);
+            $productsListItem->getItem($item);
             $productsListItem->set($jsonProductList);
+            $productsListItem->tag("products");
+            $productsListItem->expiresAfter(60);
             $pool->save($productsListItem);
             sleep(3); // TEST CACHE WAY
             return new JsonResponse($jsonProductList, Response::HTTP_OK, [], true);

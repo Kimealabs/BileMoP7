@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,10 +30,8 @@ class DeleteUserController extends AbstractController
         if ($user) {
             if ($user->getClient() === $client) {
                 // DELETE CACHE TAG userslist (pagination and list are changed)
-                $pool->invalidateTags(["usersList"]);
                 // DELETE THIS USER if IN CACHE
-                $userInCache = $pool->getItem("users-details-" . $id);
-                if ($userInCache) $pool->delete("users-details-" . $id);
+                $pool->invalidateTags(["usersList", "user_" . $user->getId()]);
 
                 $entityManagerInterface->remove($user);
                 $entityManagerInterface->flush();
