@@ -2,7 +2,9 @@
 
 namespace App\Controller\User;
 
-use OpenApi\Attributes as OA;
+use OpenApi\Annotations as OA;
+use Nelmio\ApiDocBundle\Annotation\Security;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,16 +20,36 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/api/users', name: 'app_users_post', methods: ['POST'], stateless: true)]
-#[OA\Get(
-    path: '/api/users',
-    description: "CREATE A NEW USER",
-    responses: [
-        new OA\Response(response: 202, description: 'CREATED - show header Location'),
-        new OA\Response(response: 400, description: 'BAD REQUEST - A problem with body data'),
-        new OA\Response(response: 401, description: 'UNAUTHORIZED - JWT Token not found | Expired JWT Token | Invalid JWT Token'),
-    ]
-)]
-#[OA\Tag(name: 'Users')]
+/**
+ * @OA\Post(
+ *      summary="Create user",
+ *      operationId="postUser",
+ *      @OA\Response(
+ *          response=400,
+ *          description="Invalid fields"
+ *      ),
+ *      @OA\RequestBody(
+ *          description="Create a new user",
+ *          required=true,
+ *          @OA\JsonContent(
+ *              example={
+ *               "firstname" : "John",
+ *               "secondname": "Doe",
+ *               "email": "johndoe@nobody.org",
+ *               "address": "123 Strange street, CA"
+ *              },
+ *              @OA\Schema(
+ *                  type="object",
+ *                  @OA\Property(property="firstname", required=true, description="Firstname", type="string"),
+ *                  @OA\Property(property="secondname", required=true, description="Secondname", type="string"),
+ *                  @OA\Property(property="email", required=true, description="Email", type="string"),
+ *                  @OA\Property(property="address", required=true, description="Address", type="string")
+ *              )
+ *          )
+ *      )
+ * )
+ * @OA\Tag(name="Users")
+ */
 class PostUserController extends AbstractController
 {
     public function __invoke(

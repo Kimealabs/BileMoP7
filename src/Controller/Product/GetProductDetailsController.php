@@ -18,6 +18,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 #[Route('/api/products/{id}', name: 'app_products_details', methods: ['GET'], requirements: ['id' => '\d+'], stateless: true)]
 #[OA\Get(
     path: '/api/products/{id}',
+    summary: "SHOW PRODUCT DETAILS",
     description: "PRODUCT DETAILS BY id",
     responses: [
         new OA\Response(response: 200, description: 'OK - id Products details'),

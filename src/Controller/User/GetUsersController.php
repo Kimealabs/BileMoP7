@@ -18,6 +18,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 #[Route('/api/users', name: 'app_users_list', methods: ['GET'], stateless: true)]
 #[OA\Get(
     path: '/api/users',
+    summary: "LIST ALL USERS FOR CLIENT",
     description: "USERS LIST BY AUTHENTICATED CLIENT",
     responses: [
         new OA\Response(response: 200, description: 'OK - List of Authenticate Client users'),

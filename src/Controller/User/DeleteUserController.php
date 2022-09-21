@@ -16,6 +16,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 #[Route('/api/users/{id}', name: 'app_users_delete', methods: ['DELETE'], requirements: ['id' => '\d+'], stateless: true)]
 #[OA\Get(
     path: '/api/users/{id}',
+    summary: "DELETE AN USER",
     description: "DELETE USER BY id",
     responses: [
         new OA\Response(response: 204, description: 'NO CONTENT - User deleted'),

@@ -3,9 +3,9 @@
 namespace App\Controller\Product;
 
 use App\Entity\Product;
-use OpenApi\Attributes as OA;
-use Nelmio\ApiDocBundle\Annotation\Security;
 use App\Repository\ProductRepository;
+use OpenApi\Annotations as OA;
+use Nelmio\ApiDocBundle\Annotation\Security;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,30 +17,46 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-#[Route('/api/products', name: 'app_products_list', methods: ['GET'], stateless: true)]
-#[OA\Get(
-    path: '/api/products',
-    description: "PRODUCTS LIST",
-    responses: [
-        new OA\Response(response: 200, description: 'OK - List of all Products'),
-        new OA\Response(response: 404, description: 'NOT FOUND - No product in database'),
-        new OA\Response(response: 401, description: 'UNAUTHORIZED - JWT Token not found | Expired JWT Token | Invalid JWT Token')
-    ]
-)]
 
-#[OA\Parameter(
-    name: 'page',
-    in: 'query',
-    description: 'The field used to choose number page',
-    schema: new OA\Schema(type: 'integer')
-)]
-#[OA\Parameter(
-    name: 'page_size',
-    in: 'query',
-    description: 'The field used to choose number of items by page',
-    schema: new OA\Schema(type: 'integer')
-)]
-#[OA\Tag(name: 'Products')]
+/**
+ * @OA\Response(
+ *      response=200,
+ *      description="Use this method to gel all products.",
+ *      @OA\JsonContent(
+ *          @OA\Property(property="meta", type="string",
+ *              example={"total_products":2451, "Max_page_size":5}
+ *          ),
+ *          @OA\Property(property="links", type="string",
+ *              example={
+ *                  {"href":"/api/products?page=3&page_size=5", "rel":"self", "method":"GET"},
+ *                  {"href":"/api/products?page=1&page_size=5", "rel":"first_page", "method":"GET"},
+ *                  {"href":"/api/products?page=5&page_size=5", "rel":"last_page", "method":"GET"},
+ *                  {"href":"/api/products?page=4&page_size=5", "rel":"next_page", "method":"GET"},
+ *                  {"href":"/api/products?page=2&page_size=5", "rel":"previous_page", "method":"GET"}
+ *              }
+ *          ),
+ *          @OA\Property(property="products", type="array",
+ *              @OA\Items(ref=@Model(type=Product::class, groups={"getProducts"}))
+ *          )
+ *      )
+ * )
+ * @OA\Parameter(
+ *      name="page",
+ *      in="query",
+ *      description="Page number",
+ *      @OA\Schema(type="int")
+ * )
+ * @OA\Parameter(
+ *      name="page_size",
+ *      in="query",
+ *      description="Number of products per page",
+ *      @OA\Schema(type="int")
+ * )
+
+ * @OA\Tag(name="Products")
+ */
+
+#[Route('/api/products', name: 'app_products_list', methods: ['GET'], stateless: true)]
 class GetProductsController extends AbstractController
 {
     public function __invoke(
@@ -85,8 +101,8 @@ class GetProductsController extends AbstractController
         if ($products) {
             $content = [
                 "meta" => [
-                    "total products" => $totalProducts,
-                    "Max page_size" => 5
+                    "total_products" => $totalProducts,
+                    "Max_page_size" => 5
                 ],
                 "links" => [
                     [

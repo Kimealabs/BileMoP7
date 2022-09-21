@@ -17,6 +17,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 #[Route('/api/users/{id}', name: 'app_users_details', methods: ['GET'], requirements: ['id' => '\d+'], stateless: true)]
 #[OA\Get(
     path: '/api/users/{id}',
+    summary: "SHOW USER DETAILS",
     description: "USER DETAILS BY AUTHENTICATED CLIENT",
     responses: [
         new OA\Response(response: 200, description: 'OK - id User details'),
