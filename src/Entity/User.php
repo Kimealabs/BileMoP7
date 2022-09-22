@@ -6,6 +6,9 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Nelmio\ApiDocBundle\Annotation\Security;
+use OpenApi\Annotations as OA;
+use Nelmio\ApiDocBundle\Annotation\Model;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User
@@ -14,24 +17,36 @@ class User
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(["getUsers", "getUser"])]
+    /**
+     * @OA\Property(property="id", type="integer", example=456789)
+     */
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(["getUsers", "getUser"])]
     #[Assert\NotBlank(message: "Firstname is required")]
-    #[Assert\Length(min: 1, max: 255, minMessage: "Firstname must be at least {{ limit }} characters", maxMessage: "Firstname cannot be longer than {{ limit }} characters")]
+    #[Assert\Length(min: 3, max: 255, minMessage: "Firstname must be at least {{ limit }} characters", maxMessage: "Firstname cannot be longer than {{ limit }} characters")]
+    /**
+     * @OA\Property(property="firstname", type="string", example="John")
+     */
     private ?string $firstname = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(["getUsers", "getUser"])]
     #[Assert\NotBlank(message: "Secondname is required")]
-    #[Assert\Length(min: 1, max: 255, minMessage: "Secondname must be at least {{ limit }} characters", maxMessage: "Secondname cannot be longer than {{ limit }} characters")]
+    #[Assert\Length(min: 3, max: 255, minMessage: "Secondname must be at least {{ limit }} characters", maxMessage: "Secondname cannot be longer than {{ limit }} characters")]
+    /**
+     * @OA\Property(property="secondname", type="string", example="Doe")
+     */
     private ?string $secondname = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(["getUser"])]
     #[Assert\NotBlank(message: "Address is required")]
-    #[Assert\Length(min: 1, max: 255, minMessage: "Address must be at least {{ limit }} characters", maxMessage: "Address cannot be longer than {{ limit }} characters")]
+    #[Assert\Length(min: 3, max: 255, minMessage: "Address must be at least {{ limit }} characters", maxMessage: "Address cannot be longer than {{ limit }} characters")]
+    /**
+     * @OA\Property(property="address", type="string", example="123 Mystery Street, CA")
+     */
     private ?string $address = null;
 
     #[ORM\Column(length: 255)]
@@ -39,6 +54,9 @@ class User
     #[Assert\NotBlank(message: "Email is required")]
     #[Assert\Email(message: 'The email is not valid')]
     #[Assert\Length(min: 1, max: 255, minMessage: "Email must be at least {{ limit }} characters", maxMessage: "Email cannot be longer than {{ limit }} characters")]
+    /**
+     * @OA\Property(property="email", type="string", example="johndoe@example.com")
+     */
     private ?string $email = null;
 
     #[ORM\ManyToOne(inversedBy: 'user')]
@@ -46,6 +64,15 @@ class User
     private ?Client $client = null;
 
     #[Groups(["getUsers"])]
+    /**
+     * @OA\Property(
+     *      type="string",
+     *           example={
+     *              {"href":"/api/users/456789", "rel":"self", "method":"GET"},
+     *              {"href":"/api/users/456789", "rel":"delete user", "method":"DELETE"}
+     *           }
+     * )
+     */
     private ?array $links = null;
 
     public function setLinks(array $links): self

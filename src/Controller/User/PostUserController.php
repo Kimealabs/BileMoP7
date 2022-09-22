@@ -22,14 +22,39 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 #[Route('/api/users', name: 'app_users_post', methods: ['POST'], stateless: true)]
 /**
  * @OA\Post(
- *      summary="Create user",
+ *      summary="CREATE USER",
+ *      description="Create a new user for authenticated client",
  *      operationId="postUser",
  *      @OA\Response(
  *          response=400,
- *          description="Invalid fields"
+ *          description="INVALID FIELDS",
+ *          @OA\JsonContent(
+ *              @OA\Property(property="code", type="string", example="code: 400"),
+ *              @OA\Property(property="message", type="string",example={"#1": "Firstname is required", "#2": "Firstname must be at least 3 characters"})
+ *          )
+ *      ),
+ *  *   @OA\Response(
+ *          response=201,
+ *          description="USER CREATED (show Location header)",
+ *  *          @OA\JsonContent(
+ *              example={
+ *               "firstname" : "John",
+ *               "secondname": "Doe",
+ *               "email": "johndoe@nobody.org",
+ *               "address": "123 Strange street, CA"
+ *              }
+            )
+ *      ),
+ *      @OA\Response(
+ *          response=401,
+ *          description="UNAUTHORIZED - JWT Token not found | Expired JWT Token | Invalid JWT Token",
+ *          @OA\JsonContent(
+ *              @OA\Property(property="code", type="string", example="code: 401"),
+ *              @OA\Property(property="message", type="string", example="JWT Token not found | Expired JWT Token | Invalid JWT Token")
+ *          )
  *      ),
  *      @OA\RequestBody(
- *          description="Create a new user",
+ *          description="Fill the fields",
  *          required=true,
  *          @OA\JsonContent(
  *              example={
@@ -69,7 +94,11 @@ class PostUserController extends AbstractController
         $errors = $validator->validate($user);
 
         if ($errors->count() > 0) {
-            throw new HttpException(JsonResponse::HTTP_BAD_REQUEST, $errors[0]->getMessage());
+            foreach ($errors as $key => $error) {
+                $message["#" . $key + 1] = $error->getMessage();
+            }
+            $messages = $serializer->serialize(["code" => 400, "message" => $message], 'json');
+            return new JsonResponse($messages, Response::HTTP_BAD_REQUEST, [], true);
         }
 
         $user->setClient($client);

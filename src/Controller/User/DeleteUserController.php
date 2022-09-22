@@ -2,8 +2,9 @@
 
 namespace App\Controller\User;
 
+use OpenApi\Annotations as OA;
+use Nelmio\ApiDocBundle\Annotation\Security;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use OpenApi\Attributes as OA;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,26 +14,50 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+/**
+ * @OA\Delete(
+ *      summary="DELETE USER",
+ *      description="Delete a user belonging to a authenticated client.",
+ *      operationId="deleteUser"
+ * ) 
+ * @OA\Response(
+ *      response=204,
+ *      description="USER DELETED"
+ * )
+ * @OA\Response(
+ *      response=401,
+ *      description="UNAUTHORIZED - JWT Token not found | Expired JWT Token | Invalid JWT Token",
+ *      @OA\JsonContent(
+ *        @OA\Property(property="code", type="string", example="code: 401"),
+ *        @OA\Property(property="message", type="string", example="JWT Token not found | Expired JWT Token | Invalid JWT Token")
+ *      )
+ * )
+ * @OA\Response(
+ *      response=404,
+ *      description="NOT FOUND - This user don't exist",
+ *      @OA\JsonContent(
+ *        @OA\Property(property="code", type="string", example="404"),
+ *        @OA\Property(property="message", type="string", example="This user don't exist")
+ *      )
+ * )
+ * @OA\Response(
+ *     response=403,
+ *     description="FORBIDDEN - This resource does not belong to you'",
+ *     @OA\JsonContent(
+ *       @OA\Property(property="code", type="string", example="403"),
+ *       @OA\Property(property="message", type="string", example="This resource does not belong to you")
+ *     )
+ * )
+ * @OA\Parameter(
+ *      name="id",
+ *      in="path",
+ *      required= true,
+ *      description="The identifiant of user",
+ *      @OA\Schema(type="int")
+ * )
+ * @OA\Tag(name="Users")
+ */
 #[Route('/api/users/{id}', name: 'app_users_delete', methods: ['DELETE'], requirements: ['id' => '\d+'], stateless: true)]
-#[OA\Get(
-    path: '/api/users/{id}',
-    summary: "DELETE AN USER",
-    description: "DELETE USER BY id",
-    responses: [
-        new OA\Response(response: 204, description: 'NO CONTENT - User deleted'),
-        new OA\Response(response: 404, description: 'NOT FOUND - This user don\'t exist'),
-        new OA\Response(response: 403, description: 'FORBIDDEN - This resource does not belong to you'),
-        new OA\Response(response: 401, description: 'UNAUTHORIZED - JWT Token not found | Expired JWT Token | Invalid JWT Token'),
-    ]
-)]
-#[OA\Parameter(
-    name: 'id',
-    in: 'path',
-    required: true,
-    description: 'The idendifiant of user',
-    schema: new OA\Schema(type: 'integer')
-)]
-#[OA\Tag(name: 'Users')]
 class DeleteUserController extends AbstractController
 {
     public function __invoke(

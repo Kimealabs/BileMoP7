@@ -19,6 +19,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 
 /**
+ * @OA\Get(
+ *      description="List all products with paginate",
+ *      summary="SHOW ALL PRODUCTS"
+ * )
  * @OA\Response(
  *      response=200,
  *      description="Use this method to gel all products.",
@@ -38,6 +42,22 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  *          @OA\Property(property="products", type="array",
  *              @OA\Items(ref=@Model(type=Product::class, groups={"getProducts"}))
  *          )
+ *      )
+ * )
+ * @OA\Response(
+ *      response=401,
+ *      description="UNAUTHORIZED - JWT Token not found | Expired JWT Token | Invalid JWT Token",
+ *      @OA\JsonContent(
+ *        @OA\Property(property="code", type="string", example="code: 401"),
+ *        @OA\Property(property="message", type="string", example="JWT Token not found | Expired JWT Token | Invalid JWT Token")
+ *      )
+ * )
+ * @OA\Response(
+ *      response=404,
+ *      description="NOT FOUND - NO PRODUCT IN DATABASE",
+ *      @OA\JsonContent(
+ *        @OA\Property(property="code", type="string", example="404"),
+ *        @OA\Property(property="message", type="string", example="No product in database")
  *      )
  * )
  * @OA\Parameter(

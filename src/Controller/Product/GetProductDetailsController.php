@@ -2,9 +2,11 @@
 
 namespace App\Controller\Product;
 
-use Nelmio\ApiDocBundle\Annotation\Model;
-use OpenApi\Attributes as OA;
+use App\Entity\Product;
 use App\Repository\ProductRepository;
+use OpenApi\Annotations as OA;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -14,26 +16,51 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+/**
+ * @OA\Get(
+ *      description="PRODUCT DETAILS BY id",
+ *      summary="SHOW PRODUCT DETAILS"
+ * )
+ * @OA\Response(
+ *      response=200,
+ *      description="Use this method to gel all products.",
+ *      @OA\JsonContent(
+ *          @OA\Property(property="links", type="string",
+ *              example={
+ *                  {"href":"/api/product/84615", "rel":"self", "method":"GET"},
+ *              }
+ *          ),
+ *          @OA\Property(property="products", type="array",
+ *              @OA\Items(ref=@Model(type=Product::class))
+ *          )
+ *      )
+ * )
+ * @OA\Response(
+ *      response=401,
+ *      description="UNAUTHORIZED - JWT Token not found | Expired JWT Token | Invalid JWT Token",
+ *      @OA\JsonContent(
+ *        @OA\Property(property="code", type="string", example="code: 401"),
+ *        @OA\Property(property="message", type="string", example="JWT Token not found | Expired JWT Token | Invalid JWT Token")
+ *      )
+ * )
+ * @OA\Response(
+ *      response=404,
+ *      description="NOT FOUND - NO PRODUCT IN DATABASE",
+ *      @OA\JsonContent(
+ *        @OA\Property(property="code", type="string", example="404"),
+ *        @OA\Property(property="message", type="string", example="This Product do not exist")
+ *      )
+ * )
+ * @OA\Parameter(
+ *      name="id",
+ *      in="path",
+ *      description="The identifiant of product",
+ *      @OA\Schema(type="integer")
+ * )
+ * @OA\Tag(name="Products")
+ */
 
 #[Route('/api/products/{id}', name: 'app_products_details', methods: ['GET'], requirements: ['id' => '\d+'], stateless: true)]
-#[OA\Get(
-    path: '/api/products/{id}',
-    summary: "SHOW PRODUCT DETAILS",
-    description: "PRODUCT DETAILS BY id",
-    responses: [
-        new OA\Response(response: 200, description: 'OK - id Products details'),
-        new OA\Response(response: 404, description: 'NOT FOUND - This Product do not exist'),
-        new OA\Response(response: 401, description: 'UNAUTHORIZED - JWT Token not found | Expired JWT Token | Invalid JWT Token')
-    ]
-)]
-#[OA\Parameter(
-    name: 'id',
-    in: 'path',
-    required: true,
-    description: 'The idendifiant of product',
-    schema: new OA\Schema(type: 'integer')
-)]
-#[OA\Tag(name: 'Products')]
 class GetProductDetailsController extends AbstractController
 {
     public function __invoke(

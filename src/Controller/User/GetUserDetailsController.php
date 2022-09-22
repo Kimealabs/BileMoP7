@@ -2,9 +2,11 @@
 
 namespace App\Controller\User;
 
-use Nelmio\ApiDocBundle\Annotation\Model;
-use OpenApi\Attributes as OA;
+use App\Entity\User;
+use OpenApi\Annotations as OA;
 use App\Repository\UserRepository;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -14,26 +16,61 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+/**
+ * @OA\Get(
+ *      description="USER DETAILS WITH PAGINATE FOR AUTHENTICATED CLIENT",
+ *      summary="SHOW USER DETAILS"
+ * )
+ * @OA\Response(
+ *      response=200,
+ *      description="OK - id User details",
+ *      @OA\JsonContent(
+ *          @OA\Property(property="links", type="string",
+ *              example={
+ *                  {"href":"/api/users/84615", "rel":"self", "method":"GET"},
+ *                  {"href":"/api/users/84615", "rel":"delete user", "method":"DELETE"}
+ *              }
+ *          ),
+ *          @OA\Property(property="user", type="object",
+ *              ref=@Model(type=User::class, groups={"getUser"})
+ *          )
+ *      )
+ * )
+ * @OA\Response(
+ *      response=401,
+ *      description="UNAUTHORIZED - JWT Token not found | Expired JWT Token | Invalid JWT Token",
+ *      @OA\JsonContent(
+ *        @OA\Property(property="code", type="string", example="code: 401"),
+ *        @OA\Property(property="message", type="string", example="JWT Token not found | Expired JWT Token | Invalid JWT Token")
+ *      )
+ * )
+ * @OA\Response(
+ *      response=404,
+ *      description="NOT FOUND - This user don't exist",
+ *      @OA\JsonContent(
+ *        @OA\Property(property="code", type="string", example="404"),
+ *        @OA\Property(property="message", type="string", example="This user don't exist")
+ *      )
+ * )
+ * @OA\Response(
+ *     response=403,
+ *     description="FORBIDDEN - This resource does not belong to you'",
+ *     @OA\JsonContent(
+ *       @OA\Property(property="code", type="string", example="403"),
+ *       @OA\Property(property="message", type="string", example="This resource does not belong to you")
+ *     )
+ * )
+
+ * @OA\Parameter(
+ *      name="id",
+ *      in="path",
+ *      description="The identifiant of user",
+ *      @OA\Schema(type="int")
+ * )
+ * @OA\Tag(name="Users")
+ */
+
 #[Route('/api/users/{id}', name: 'app_users_details', methods: ['GET'], requirements: ['id' => '\d+'], stateless: true)]
-#[OA\Get(
-    path: '/api/users/{id}',
-    summary: "SHOW USER DETAILS",
-    description: "USER DETAILS BY AUTHENTICATED CLIENT",
-    responses: [
-        new OA\Response(response: 200, description: 'OK - id User details'),
-        new OA\Response(response: 404, description: 'NOT FOUND - This user don\'t exist'),
-        new OA\Response(response: 403, description: 'FORBIDDEN - This resource does not belong to you'),
-        new OA\Response(response: 401, description: 'UNAUTHORIZED - JWT Token not found | Expired JWT Token | Invalid JWT Token'),
-    ]
-)]
-#[OA\Parameter(
-    name: 'id',
-    in: 'path',
-    required: true,
-    description: 'The identifiant of user',
-    schema: new OA\Schema(type: 'integer')
-)]
-#[OA\Tag(name: 'Users')]
 class GetUserDetailsController extends AbstractController
 {
     public function __invoke(
