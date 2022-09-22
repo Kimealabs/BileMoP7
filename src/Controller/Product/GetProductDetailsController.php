@@ -31,7 +31,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  *              }
  *          ),
  *          @OA\Property(property="products", type="array",
- *              @OA\Items(ref=@Model(type=Product::class))
+ *              @OA\Items(ref=@Model(type=Product::class, groups={"getProduct"}))
  *          )
  *      )
  * )
@@ -76,7 +76,7 @@ class GetProductDetailsController extends AbstractController
             return new JsonResponse($pool->getItem($item)->get(), Response::HTTP_OK, ["cache-control" => "max-age=60"], true);
         }
 
-        $product = $productRepository->find($id);
+        $product = $productRepository->find((int) $id);
 
         if (!$product) {
             throw new HttpException(JsonResponse::HTTP_NOT_FOUND, "This Product don't exist");
@@ -94,7 +94,7 @@ class GetProductDetailsController extends AbstractController
         ];
 
         // SET AND SAVE CACHE ITEM
-        $jsonProduct = $serializer->serialize($content, 'json');
+        $jsonProduct = $serializer->serialize($content, 'json', ['groups' => 'getProduct']);
         $productsDetailsItem = $pool->getItem($item);
         $productsDetailsItem->set($jsonProduct);
         $productsDetailsItem->tag("products");

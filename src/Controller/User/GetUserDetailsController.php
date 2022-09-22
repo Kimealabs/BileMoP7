@@ -65,7 +65,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  *      name="id",
  *      in="path",
  *      description="The identifiant of user",
- *      @OA\Schema(type="int")
+ *      @OA\Schema(type="integer")
  * )
  * @OA\Tag(name="Users")
  */

@@ -63,13 +63,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  *      name="page",
  *      in="query",
  *      description="Page number",
- *      @OA\Schema(type="int")
+ *      @OA\Schema(type="integer")
  * )
  * @OA\Parameter(
  *      name="page_size",
  *      in="query",
  *      description="Number of users per page",
- *      @OA\Schema(type="int")
+ *      @OA\Schema(type="integer")
  * )
 
  * @OA\Tag(name="Users")
