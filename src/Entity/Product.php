@@ -6,6 +6,10 @@ use App\Repository\ProductRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Nelmio\ApiDocBundle\Annotation\Security;
+use OpenApi\Annotations as OA;
+use Nelmio\ApiDocBundle\Annotation\Model;
+
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
@@ -13,39 +17,83 @@ class Product
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["getProducts"])]
+    #[Groups(["getProducts", "getProduct"])]
+    /**
+     * @OA\Property(property="id", type="integer", example=456789)
+     */
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["getProducts"])]
+    #[Groups(["getProducts", "getProduct"])]
+    /**
+     * @OA\Property(property="model", type="string", example="Mi9T")
+     */
     private ?string $model = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["getProducts"])]
+    #[Groups(["getProducts", "getProduct"])]
+    /**
+     * @OA\Property(property="brand", type="string", example="Xiaomi")
+     */
     private ?string $brand = null;
 
     #[ORM\Column]
+    #[Groups(["getProduct"])]
+    /**
+     * @OA\Property(property="createdAt", type="date-time", example="2021-09-22T07:18:55.920Z")
+     */
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(["getProduct"])]
+    /**
+     * @OA\Property(property="releaseDate", type="date-time", example="2021-09-22T07:18:55.920Z")
+     */
     private ?\DateTimeInterface $releaseDate = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getProduct"])]
+    /**
+     * @OA\Property(property="display", type="string", example="6.04inch 1200x4000")
+     */
     private ?string $display = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getProduct"])]
+    /**
+     * @OA\Property(property="frontCamera", type="string", example="12MP")
+     */
     private ?string $frontCamera = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getProduct"])]
+    /**
+     * @OA\Property(property="rearCamera", type="string", example="12MP + 24MP")
+     */
     private ?string $rearCamera = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getProduct"])]
+    /**
+     * @OA\Property(property="processor", type="string", example="Octa-core Miktek 12")
+     */
     private ?string $processor = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getProduct"])]
+    /**
+     * @OA\Property(property="price", type="string", example="249.90")
+     */
     private ?string $price = null;
 
     #[Groups(["getProducts"])]
+    /**
+     * @OA\Property(
+     *  property="links",
+     *  type="array",
+     *  @OA\Items(example={"href": "/api/products/456789", "rel": "self", "method": "GET"})
+     * )
+     */
     private ?array $links = null;
 
     public function setLinks(array $links): self

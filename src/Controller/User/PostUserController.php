@@ -2,7 +2,9 @@
 
 namespace App\Controller\User;
 
-use OpenApi\Attributes as OA;
+use OpenApi\Annotations as OA;
+use Nelmio\ApiDocBundle\Annotation\Security;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,16 +20,61 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/api/users', name: 'app_users_post', methods: ['POST'], stateless: true)]
-#[OA\Get(
-    path: '/api/users',
-    description: "CREATE A NEW USER",
-    responses: [
-        new OA\Response(response: 202, description: 'CREATED - show header Location'),
-        new OA\Response(response: 400, description: 'BAD REQUEST - A problem with body data'),
-        new OA\Response(response: 401, description: 'UNAUTHORIZED - JWT Token not found | Expired JWT Token | Invalid JWT Token'),
-    ]
-)]
-#[OA\Tag(name: 'Users')]
+/**
+ * @OA\Post(
+ *      summary="CREATE USER",
+ *      description="Create a new user for authenticated client",
+ *      operationId="postUser",
+ *      @OA\Response(
+ *          response=400,
+ *          description="INVALID FIELDS",
+ *          @OA\JsonContent(
+ *              @OA\Property(property="code", type="string", example="code: 400"),
+ *              @OA\Property(property="message", type="string",example={"#1": "Firstname is required", "#2": "Firstname must be at least 3 characters"})
+ *          )
+ *      ),
+ *  *   @OA\Response(
+ *          response=201,
+ *          description="USER CREATED (show Location header)",
+ *  *          @OA\JsonContent(
+ *              example={
+ *               "firstname" : "John",
+ *               "secondname": "Doe",
+ *               "email": "johndoe@nobody.org",
+ *               "address": "123 Strange street, CA"
+ *              }
+            )
+ *      ),
+ *      @OA\Response(
+ *          response=401,
+ *          description="UNAUTHORIZED - JWT Token not found | Expired JWT Token | Invalid JWT Token",
+ *          @OA\JsonContent(
+ *              @OA\Property(property="code", type="string", example="code: 401"),
+ *              @OA\Property(property="message", type="string", example="JWT Token not found | Expired JWT Token | Invalid JWT Token")
+ *          )
+ *      ),
+ *      @OA\RequestBody(
+ *          description="Fill the fields",
+ *          required=true,
+ *          @OA\JsonContent(
+ *              example={
+ *               "firstname" : "John",
+ *               "secondname": "Doe",
+ *               "email": "johndoe@nobody.org",
+ *               "address": "123 Strange street, CA"
+ *              },
+ *              @OA\Schema(
+ *                  type="object",
+ *                  @OA\Property(property="firstname", required=true, description="Firstname", type="string"),
+ *                  @OA\Property(property="secondname", required=true, description="Secondname", type="string"),
+ *                  @OA\Property(property="email", required=true, description="Email", type="string"),
+ *                  @OA\Property(property="address", required=true, description="Address", type="string")
+ *              )
+ *          )
+ *      )
+ * )
+ * @OA\Tag(name="Users")
+ */
 class PostUserController extends AbstractController
 {
     public function __invoke(
@@ -47,7 +94,11 @@ class PostUserController extends AbstractController
         $errors = $validator->validate($user);
 
         if ($errors->count() > 0) {
-            throw new HttpException(JsonResponse::HTTP_BAD_REQUEST, $errors[0]->getMessage());
+            foreach ($errors as $key => $error) {
+                $message["#" . $key + 1] = $error->getMessage();
+            }
+            $messages = $serializer->serialize(["code" => 400, "message" => $message], 'json');
+            return new JsonResponse($messages, Response::HTTP_BAD_REQUEST, [], true);
         }
 
         $user->setClient($client);

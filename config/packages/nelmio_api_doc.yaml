@@ -3,7 +3,7 @@ nelmio_api_doc:
         info:
             title: BileMo
             description: A REST API BileMo with Symfony for OCR
-            version: 1.0.0
+            version: 1.0.5
         paths:
             /api/login_check:
                 post:
@@ -24,16 +24,6 @@ nelmio_api_doc:
                                 application/json:
                                     schema:
                                         $ref: "#/components/schemas/Token"
-            /api/users:
-                post:
-                    operationId: postUserItem
-                    summary: CREATE NEW USER
-                    requestBody:
-                        description: Create a new user
-                        content:
-                            application/json:
-                                schema:
-                                    $ref: "#/components/schemas/UserData"
         components:
             schemas:
                 Token:
@@ -51,21 +41,6 @@ nelmio_api_doc:
                         password:
                             type: string
                             default: yourPassword
-                UserData:
-                    type: object
-                    properties:
-                        email:
-                            type: string
-                            default: xxx@xxxx.com
-                        firstname:
-                            type: string
-                            default: yourFirstName
-                        secondname:
-                            type: string
-                            default: yourScondName
-                        address:
-                            type: string
-                            default: your address
             securitySchemes:
                 bearerAuth:
                     type: apiKey
@@ -75,4 +50,6 @@ nelmio_api_doc:
             - bearerAuth: []
     areas: # to filter documented areas
         path_patterns:
-            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+            #- ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+            - ^/api/products
+            - ^/api/users
