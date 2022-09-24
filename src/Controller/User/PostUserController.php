@@ -6,12 +6,12 @@ use OpenApi\Annotations as OA;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use App\Entity\User;
+use App\Services\CacheTools;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -83,7 +83,7 @@ class PostUserController extends AbstractController
         EntityManagerInterface $entityManagerInterface,
         ValidatorInterface $validator,
         SerializerInterface $serializer,
-        TagAwareCacheInterface $pool
+        CacheTools $cacheTools
     ): JsonResponse {
 
         $client = $this->getUser();
@@ -106,7 +106,7 @@ class PostUserController extends AbstractController
         $entityManagerInterface->flush();
 
         //DELETE usersList in pool (pagination and list are changed)
-        $pool->invalidateTags(["usersList"]);
+        $cacheTools->deleteTags(["usersList"]);
 
         $postJson = $serializer->serialize($user, 'json', ['groups' => 'getUser']);
         $location = $urlGenerator->generate('app_users_details', ['id' => $user->getId()], UrlGeneratorInterface::ABSOLUTE_URL);

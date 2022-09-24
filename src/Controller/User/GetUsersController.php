@@ -3,18 +3,20 @@
 namespace App\Controller\User;
 
 use App\Entity\User;
+use App\Services\Hateoas;
+use App\Services\Paginator;
 use OpenApi\Annotations as OA;
+use App\Services\PaginateHateoas;
 use App\Repository\UserRepository;
+use App\Services\CacheTools;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
@@ -81,103 +83,40 @@ class GetUsersController extends AbstractController
         Request $request,
         UserRepository $userRepository,
         SerializerInterface $serializer,
-        TagAwareCacheInterface $pool
+        Paginator $paginator,
+        Hateoas $hateoas,
+        PaginateHateoas $paginateHateoas,
+        CacheTools $cacheTools
     ): JsonResponse {
 
-        $page = (int) $request->query->get('page', 1);
-        $page_size = (int) $request->query->get('page_size', 5);
-        if ($page == 0) $page = 1;
-        if ($page_size == 0) $page_size = 1;
-        if ($page_size > 5) $page_size = 5;
-
         $client = $this->getUser();
-
         $totalUsers = $userRepository->getTotalUsersByClient($client->getId());
-        $totalPages = ceil($totalUsers / $page_size);
-        if ($totalPages < $page) $page = $totalPages;
-        $nextPage = ($page < $totalPages) ? $page + 1 : null;
-        $previousPage = ($page > 1) ? $page - 1 : null;
-        $currentPage = $page;
+
+        $paginator->setParams($totalUsers, $request->query->get('page'), $request->query->get('page_size'));
 
         // Cache item - return cache if item exist (users-list-page-page_size-client_id)
-        $item = 'users-list-' . $page . '-' . $page_size . '-client_' . $client->getId();
-        if ($pool->hasItem($item)) {
-            return new JsonResponse($pool->getItem($item)->get(), Response::HTTP_OK, ["cache-control" => "max-age=60"], true);
+        $item = 'users-list-' . $paginator->getCurrentPage() . '-' . $paginator->getPageSize() . '-client_' . $client->getId();
+        if ($cacheTools->setItem($item)) {
+            return new JsonResponse($cacheTools->getItem(), Response::HTTP_OK, ["cache-control" => "max-age=60"], true);
         }
 
-        $users = $userRepository->findUsersByClientPaginate($page_size, $page, $client->getId());
+        $users = $userRepository->findUsersByClientPaginate($paginator->getPageSize(), $paginator->getCurrentPage(), $client->getId());
 
         foreach ($users as $user) {
             $user->setLinks([
-                [
-                    "href" => $this->generateUrl('app_users_details', ["id" => $user->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
-                    "rel" => "self",
-                    "method" => "GET"
-                ],
-                [
-                    "href" => $this->generateUrl('app_users_delete', ["id" => $user->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
-                    "rel" => "Delete user",
-                    "method" => "DELETE"
-                ]
+                $hateoas->createLink('app_users_details', 'GET', 'self', ["id" => $user->getId()]),
+                $hateoas->createLink('app_users_details', 'DELETE', 'delete_user', ["id" => $user->getId()])
             ]);
         }
 
         if ($users) {
-            $content = [
-                "meta" => [
-                    "total_users" => $totalUsers,
-                    "max_page_size" => 5
-                ],
-                "links" => [
-                    [
-                        "href" => $this->generateUrl('app_users_list', ["page" => $currentPage, "page_size" => $page_size], UrlGeneratorInterface::ABSOLUTE_URL),
-                        "rel" => "self",
-                        "method" => "GET"
-                    ],
-                    [
-                        "href" => $this->generateUrl('app_users_list', ["page" => 1, "page_size" => $page_size], UrlGeneratorInterface::ABSOLUTE_URL),
-                        "rel" => "first page",
-                        "method" => "GET"
-                    ],
-                    [
-                        "href" => $this->generateUrl('app_users_list', ["page" => $totalPages, "page_size" => $page_size], UrlGeneratorInterface::ABSOLUTE_URL),
-                        "rel" => "last page",
-                        "method" => "GET"
-                    ]
-                ]
-            ];
-            if ($nextPage !== null) {
-                $content["links"][] =
-                    [
-                        "href" => $this->generateUrl('app_users_post', ["page" => $nextPage, "page_size" => $page_size], UrlGeneratorInterface::ABSOLUTE_URL),
-                        "rel" => "next page",
-                        "method" => "GET"
-                    ];
-            }
-            if ($previousPage !== null) {
-                $content["links"][] =
-                    [
-                        "href" => $this->generateUrl('app_users_post', ["page" => $previousPage, "page_size" => $page_size], UrlGeneratorInterface::ABSOLUTE_URL),
-                        "rel" => "previous page",
-                        "method" => "GET"
-                    ];
-            }
-            $content["links"][] = [
-                "href" => $this->generateUrl('app_users_post', [], UrlGeneratorInterface::ABSOLUTE_URL),
-                "rel" => "New user",
-                "method" => "POST"
-            ];
-
+            // return array["meta", "links"]
+            $content = $paginateHateoas->createPaginateLinks($hateoas, $paginator);
+            $content["links"][] = $hateoas->createLink('app_users_post', 'POST', 'new_user', []);
             $content["users"] = $users;
 
-
             $jsonUsersList = $serializer->serialize($content, 'json', ['groups' => 'getUsers']);
-            $usersListItem = $pool->getItem($item);
-            $usersListItem->set($jsonUsersList);
-            $usersListItem->tag("usersList");
-            $usersListItem->expiresAfter(60);
-            $pool->save($usersListItem);
-            sleep(3); // TEST CACHE WAY
+            $cacheTools->saveItem('usersList', $jsonUsersList);
 
             return new JsonResponse($jsonUsersList, Response::HTTP_OK, [], true);
         }

@@ -3,17 +3,17 @@
 namespace App\Controller\Product;
 
 use App\Entity\Product;
-use App\Repository\ProductRepository;
+use App\Services\Hateoas;
 use OpenApi\Annotations as OA;
+use App\Repository\ProductRepository;
+use App\Services\CacheTools;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
@@ -67,16 +67,17 @@ class GetProductDetailsController extends AbstractController
         int $id,
         ProductRepository $productRepository,
         SerializerInterface $serializer,
-        TagAwareCacheInterface $pool
+        Hateoas $hateoas,
+        CacheTools $cacheTools
     ): JsonResponse {
 
         // Cache item - return cache if item exist
         $item = 'products-details-' . $id;
-        if ($pool->hasItem($item)) {
-            return new JsonResponse($pool->getItem($item)->get(), Response::HTTP_OK, ["cache-control" => "max-age=60"], true);
+        if ($cacheTools->setItem($item)) {
+            return new JsonResponse($cacheTools->getItem(), Response::HTTP_OK, ["cache-control" => "max-age=60"], true);
         }
 
-        $product = $productRepository->find((int) $id);
+        $product = $productRepository->find($id);
 
         if (!$product) {
             throw new HttpException(JsonResponse::HTTP_NOT_FOUND, "This Product don't exist");
@@ -84,23 +85,15 @@ class GetProductDetailsController extends AbstractController
 
         $content = [
             "links" => [
-                [
-                    "href" => $this->generateUrl('app_products_details', ["id" => $id], UrlGeneratorInterface::ABSOLUTE_URL),
-                    "rel" => "self",
-                    "type" => "GET"
-                ],
+                $hateoas->createLink('app_products_list', 'GET', 'self', ["id" => $id])
             ],
             "product" => $product
         ];
 
         // SET AND SAVE CACHE ITEM
         $jsonProduct = $serializer->serialize($content, 'json', ['groups' => 'getProduct']);
-        $productsDetailsItem = $pool->getItem($item);
-        $productsDetailsItem->set($jsonProduct);
-        $productsDetailsItem->tag("products");
-        $productsDetailsItem->expiresAfter(60);
-        $pool->save($productsDetailsItem);
-        sleep(3); // TO TEST CACHE WAY
+        $cacheTools->saveItem('products', $jsonProduct);
+
         return new JsonResponse($jsonProduct, Response::HTTP_OK, [], true);
     }
 }

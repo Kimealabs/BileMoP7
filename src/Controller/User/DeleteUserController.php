@@ -6,11 +6,11 @@ use OpenApi\Annotations as OA;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use App\Repository\UserRepository;
+use App\Services\CacheTools;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -64,7 +64,7 @@ class DeleteUserController extends AbstractController
         int $id,
         EntityManagerInterface $entityManagerInterface,
         UserRepository $userRepository,
-        TagAwareCacheInterface $pool
+        CacheTools $cacheTools
     ): JsonResponse {
 
         $client = $this->getUser();
@@ -74,7 +74,7 @@ class DeleteUserController extends AbstractController
             if ($user->getClient() === $client) {
                 // DELETE CACHE TAG userslist (pagination and list are changed)
                 // DELETE THIS USER if IN CACHE
-                $pool->invalidateTags(["usersList", "user_" . $user->getId()]);
+                $cacheTools->deleteTags(["usersList", "user_" . $user->getId()]);
 
                 $entityManagerInterface->remove($user);
                 $entityManagerInterface->flush();
