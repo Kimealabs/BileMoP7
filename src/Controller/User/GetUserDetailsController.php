@@ -3,17 +3,17 @@
 namespace App\Controller\User;
 
 use App\Entity\User;
+use App\Services\Hateoas;
 use OpenApi\Annotations as OA;
 use App\Repository\UserRepository;
+use App\Services\CacheTools;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
@@ -77,17 +77,17 @@ class GetUserDetailsController extends AbstractController
         int $id,
         UserRepository $userRepository,
         SerializerInterface $serializer,
-        TagAwareCacheInterface $pool
+        Hateoas $hateoas,
+        CacheTools $cacheTools
     ): JsonResponse {
 
         $client = $this->getUser();
 
         // Cache item - return cache if item exist
         $item = 'users-details-client_' . $client->getId() . '-user_' . $id;
-        if ($pool->hasItem($item)) {
-            return new JsonResponse($pool->getItem($item)->get(), Response::HTTP_OK, ["cache-control" => "max-age=60"], true);
+        if ($cacheTools->setItem($item)) {
+            return new JsonResponse($cacheTools->getItem(), Response::HTTP_OK, ["cache-control" => "max-age=60"], true);
         }
-
 
         $user = $userRepository->find((int) $id);
         if ($user) {
@@ -95,27 +95,14 @@ class GetUserDetailsController extends AbstractController
 
             $content = [
                 "links" => [
-                    [
-                        "href" => $this->generateUrl('app_users_details', ["id" => $id], UrlGeneratorInterface::ABSOLUTE_URL),
-                        "rel" => "self",
-                        "method" => "GET"
-                    ],
-                    [
-                        "href" => $this->generateUrl('app_users_delete', ["id" => $id], UrlGeneratorInterface::ABSOLUTE_URL),
-                        "rel" => "delete user",
-                        "method" => "DELETE"
-                    ]
+                    $hateoas->createLink('app_users_details', 'GET', 'self', ["id" => $id]),
+                    $hateoas->createLink('app_users_details', 'DELETE', 'delete_user', ["id" => $id])
                 ],
                 "user" => $user
             ];
 
             $jsonUser = $serializer->serialize($content, 'json', ['groups' => 'getUser']);
-            $usersDetailsItem = $pool->getItem($item);
-            $usersDetailsItem->set($jsonUser);
-            $usersDetailsItem->tag(['user_' . $user->getId()]);
-            $usersDetailsItem->expiresAfter(60);
-            $pool->save($usersDetailsItem);
-            sleep(3); // TEST CACHE WAY
+            $cacheTools->saveItem(['user_' . $user->getId()], $jsonUser);
 
             return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);
         }
