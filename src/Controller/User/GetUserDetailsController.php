@@ -4,9 +4,9 @@ namespace App\Controller\User;
 
 use App\Entity\User;
 use App\Services\Hateoas;
+use App\Services\CacheTools;
 use OpenApi\Annotations as OA;
 use App\Repository\UserRepository;
-use App\Services\CacheTools;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\Response;
@@ -54,10 +54,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  * )
  * @OA\Response(
  *     response=403,
- *     description="FORBIDDEN - This resource does not belong to you'",
+ *     description="FORBIDDEN - This resource does not belong to you",
  *     @OA\JsonContent(
  *       @OA\Property(property="code", type="string", example="403"),
- *       @OA\Property(property="message", type="string", example="This resource does not belong to you")
+ *       @OA\Property(property="message", type="string", example="Access denied")
  *     )
  * )
 
@@ -78,7 +78,7 @@ class GetUserDetailsController extends AbstractController
         UserRepository $userRepository,
         SerializerInterface $serializer,
         Hateoas $hateoas,
-        CacheTools $cacheTools
+        CacheTools $cacheTools,
     ): JsonResponse {
 
         $client = $this->getUser();
@@ -91,7 +91,7 @@ class GetUserDetailsController extends AbstractController
 
         $user = $userRepository->find((int) $id);
         if ($user) {
-            if ($user->getClient() !== $client) throw new HttpException(JsonResponse::HTTP_FORBIDDEN, "This resource does not belong to you");
+            $this->denyAccessUnlessGranted('VIEW_USER', $user);
 
             $content = [
                 "links" => [
@@ -102,7 +102,7 @@ class GetUserDetailsController extends AbstractController
             ];
 
             $jsonUser = $serializer->serialize($content, 'json', ['groups' => 'getUser']);
-            $cacheTools->saveItem(['user_' . $user->getId()], $jsonUser);
+            $cacheTools->saveItem('user_' . $user->getId(), $jsonUser);
 
             return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);
         }

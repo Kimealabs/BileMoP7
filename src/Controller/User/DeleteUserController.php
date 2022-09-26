@@ -42,10 +42,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  * )
  * @OA\Response(
  *     response=403,
- *     description="FORBIDDEN - This resource does not belong to you'",
+ *     description="FORBIDDEN - This resource does not belong to you",
  *     @OA\JsonContent(
  *       @OA\Property(property="code", type="string", example="403"),
- *       @OA\Property(property="message", type="string", example="This resource does not belong to you")
+ *       @OA\Property(property="message", type="string", example="Access denied")
  *     )
  * )
  * @OA\Parameter(
@@ -67,21 +67,17 @@ class DeleteUserController extends AbstractController
         CacheTools $cacheTools
     ): JsonResponse {
 
-        $client = $this->getUser();
-
         $user = $userRepository->find($id);
         if ($user) {
-            if ($user->getClient() === $client) {
-                // DELETE CACHE TAG userslist (pagination and list are changed)
-                // DELETE THIS USER if IN CACHE
-                $cacheTools->deleteTags(["usersList", "user_" . $user->getId()]);
+            $this->denyAccessUnlessGranted('DELETE_USER', $user);
+            // DELETE CACHE TAG userslist (pagination and list are changed)
+            // DELETE THIS USER if IN CACHE
+            $cacheTools->deleteTags(["usersList", "user_" . $user->getId()]);
 
-                $entityManagerInterface->remove($user);
-                $entityManagerInterface->flush();
+            $entityManagerInterface->remove($user);
+            $entityManagerInterface->flush();
 
-                return new JsonResponse(null, Response::HTTP_NO_CONTENT);
-            }
-            throw new HttpException(JsonResponse::HTTP_FORBIDDEN, "This resource does not belong to you");
+            return new JsonResponse(null, Response::HTTP_NO_CONTENT);
         }
         throw new HttpException(JsonResponse::HTTP_NOT_FOUND, "This User don't exist");
     }
