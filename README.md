@@ -37,6 +37,7 @@
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#installation">Installation</a></li>
+        <li><a href="#documentation">Documentation</a></li>
       </ul>
     </li>
     <li><a href="#contributing">Contributing</a></li>
@@ -144,6 +145,11 @@ Now you can Open 127.0.0.1:8000/api/doc for Documentation API Website
 ## ENJOY :-)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Documentation
+
+Follow this link => https://kimealabs.github.io/BileMoP7/api.html
+
 
 
 <!-- CONTRIBUTING -->
