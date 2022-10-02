@@ -27,16 +27,11 @@ class ClientVoter extends Voter
             return false;
         }
 
-        switch ($attribute) {
-            case 'DELETE_USER':
-                return $this->canDelete($subject, $client);
-                break;
-            case 'VIEW_USER':
-                return $this->canView($subject, $client);
-                break;
-        }
-
-        return false;
+        return match ($attribute) {
+            SELF::DELETE => $this->canDelete($subject, $client),
+            SELF::VIEW => $this->canView($subject, $client),
+            default =>  false
+        };
     }
 
     private function canView(User $user, Client $client): bool
